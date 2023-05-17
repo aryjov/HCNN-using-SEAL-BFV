@@ -169,7 +169,7 @@ print("--- %s seconds --- Полносвязный" % (time.time() - start_time1
 noise = decryptor.invariant_noise_budget(lyr41[0])
 
 for i in range(10):
-    if decryptor.invariant_noise_budget(lyr41[i]) > noise:
+    if decryptor.invariant_noise_budget(lyr41[i]) < noise:
         noise = decryptor.invariant_noise_budget(lyr41[i])
         
 print(f'noise budget in lyr41: {noise} bits')        
