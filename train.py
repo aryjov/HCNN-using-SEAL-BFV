@@ -65,7 +65,3 @@ model.layers[6].set_weights(tf.math.round(tf.math.multiply(model.layers[6].get_w
 print(model.evaluate(x_test, y_test_cat) )
 
 model.save('HCNN')
-pred = model.predict(x_test)
-print(np.argmax(pred[0]), y_test[0])
-model.summary()
-
