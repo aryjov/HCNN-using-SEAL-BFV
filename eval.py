@@ -178,9 +178,9 @@ print("--- %s seconds ---" % (time.time() - start_time))
     
 
 
-output = np.zeros((10, 10000), dtype=np.double) 
+output = np.zeros((10, 10000), dtype=np.longlong) 
 for i in range(10):
-    output[i] = np.array(batch_encoder.decode(decryptor.decrypt(lyr4[i]))[:10000], dtype = np.double)
+    output[i] = np.array(batch_encoder.decode(decryptor.decrypt(lyr4[i]))[:10000], dtype = np.longlong)
 output1 = np.argmax(output, axis=0) # в output1 сохранены предсказания для всего набора из 10000 изображений
 
 print("--- %s seconds ---" % (time.time() - start_time))
