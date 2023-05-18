@@ -83,21 +83,21 @@ print("--- %s seconds --- Batch encoding weights" % (time.time() - start_time1))
 
 start_time1 = time.time()
 
-cinput1 = [[0 for k in range(28)] for j in range(28)]
+cinput = [[0 for k in range(28)] for j in range(28)]
 
 for i in range(28):
     for j in range(28):
-        cinput1[i][j] = [0 for l in range(16384)]
+        cinput[i][j] = [0 for l in range(16384)]
         for k in range(10000):
-            cinput1[i][j][k] = x_test3[k][i][j]
-        temp = batch_encoder.encode(cinput1[i][j])
-        cinput1[i][j] = encryptor.encrypt(temp)
+            cinput[i][j][k] = x_test3[k][i][j]
+        temp = batch_encoder.encode(cinput[i][j])
+        cinput[i][j] = encryptor.encrypt(temp)
 
 print("--- %s seconds --- Шифрование изображений" % (time.time() - start_time1))
         
-lyr11 = [[[encryptor.encrypt(Plaintext("0")) for k in range(5)] for j in range(12)] for i in range(12)]
+lyr1 = [[[encryptor.encrypt(Plaintext("0")) for k in range(5)] for j in range(12)] for i in range(12)]
 
-print(f'noise budget in lyr11[0][0][0]: {decryptor.invariant_noise_budget(lyr11[0][0][0])} bits')
+print(f'noise budget fresh ciphertext: {decryptor.invariant_noise_budget(lyr1[0][0][0])} bits')
 
 start_time1 = time.time()
 
@@ -107,8 +107,8 @@ for i in range(5):
             for l1 in range(5):
                 for l2 in range(5):
                     if weights11[l1][l2][0][i] != 0:
-                        temp = evaluator.multiply_plain(cinput1[j * 2 + l1][k * 2 + l2], weights1[l1][l2][0][i])
-                        lyr11[j][k][i] = evaluator.add(lyr11[j][k][i], temp)
+                        temp = evaluator.multiply_plain(cinput[j * 2 + l1][k * 2 + l2], weights1[l1][l2][0][i])
+                        lyr1[j][k][i] = evaluator.add(lyr1[j][k][i], temp)
 
 print("--- %s seconds --- Свёртка 1" % (time.time() - start_time1))
 
@@ -117,14 +117,14 @@ start_time1 = time.time()
 for i in range(5):
     for j in range(12):
         for k in range(12):
-            lyr11[j][k][i] = evaluator.square(lyr11[j][k][i])
-            evaluator.relinearize_inplace(lyr11[j][k][i], relin_keys)
+            lyr1[j][k][i] = evaluator.square(lyr1[j][k][i])
+            evaluator.relinearize_inplace(lyr1[j][k][i], relin_keys)
             
 print("--- %s seconds --- Активация 1" % (time.time() - start_time1))        
 
 start_time1 = time.time()
 
-lyr21 = [[[encryptor.encrypt(Plaintext("0")) for k in range(50)] for j in range(4)] for i in range(4)] 
+lyr2 = [[[encryptor.encrypt(Plaintext("0")) for k in range(50)] for j in range(4)] for i in range(4)] 
 for i in range(50):
     for j in range(4):
         for k in range(4):
@@ -132,8 +132,8 @@ for i in range(50):
                 for l1 in range(5):
                     for l2 in range(5):
                         if weights22[l1][l2][fil][i] != 0:
-                            temp = evaluator.multiply_plain(lyr11[j * 2 + l1][k * 2 + l2][fil], weights2[l1][l2][fil][i])
-                            lyr21[j][k][i] = evaluator.add(lyr21[j][k][i], temp) 
+                            temp = evaluator.multiply_plain(lyr1[j * 2 + l1][k * 2 + l2][fil], weights2[l1][l2][fil][i])
+                            lyr2[j][k][i] = evaluator.add(lyr2[j][k][i], temp) 
 
 
 print("--- %s seconds --- Свёртка 2" % (time.time() - start_time1))
@@ -143,36 +143,36 @@ start_time1 = time.time()
 for i in range(50):
     for j in range(4):
         for k in range(4):
-            lyr21[j][k][i] = evaluator.square(lyr21[j][k][i])
-            evaluator.relinearize_inplace(lyr21[j][k][i], relin_keys)
+            lyr2[j][k][i] = evaluator.square(lyr2[j][k][i])
+            evaluator.relinearize_inplace(lyr2[j][k][i], relin_keys)
        
 print("--- %s seconds --- Активация 2" % (time.time() - start_time1))
 
-lyr31 = []
+lyr3 = []
 for i in range(4):
     for j in range(4):
         for k in range(50):
-            lyr31.append(lyr21[i][j][k])
+            lyr3.append(lyr2[i][j][k])
 
-lyr41 = [encryptor.encrypt(Plaintext("0")) for k in range(10)]
+lyr4 = [encryptor.encrypt(Plaintext("0")) for k in range(10)]
 
 start_time1 = time.time()
 
 for i in range(10):
     for j in range(800):
         if weights33[j][i] != 0:
-            temp = evaluator.multiply_plain(lyr31[j], weights3[j][i])
-            lyr41[i] = evaluator.add(lyr41[i], temp)
+            temp = evaluator.multiply_plain(lyr3[j], weights3[j][i])
+            lyr4[i] = evaluator.add(lyr4[i], temp)
 
 print("--- %s seconds --- Полносвязный" % (time.time() - start_time1))
 
-noise = decryptor.invariant_noise_budget(lyr41[0])
+noise = decryptor.invariant_noise_budget(lyr4[0])
 
 for i in range(10):
-    if decryptor.invariant_noise_budget(lyr41[i]) < noise:
-        noise = decryptor.invariant_noise_budget(lyr41[i])
+    if decryptor.invariant_noise_budget(lyr4[i]) < noise:
+        noise = decryptor.invariant_noise_budget(lyr4[i])
         
-print(f'noise budget in lyr41: {noise} bits')        
+print(f'noise budget in output ciphertext: {noise} bits')        
 print("--- %s seconds ---" % (time.time() - start_time))
            
     
@@ -180,7 +180,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 output = np.zeros((10, 10000), dtype=np.double) 
 for i in range(10):
-    output[i] = np.array(batch_encoder.decode(decryptor.decrypt(lyr41[i]))[:10000], dtype = np.double)
+    output[i] = np.array(batch_encoder.decode(decryptor.decrypt(lyr4[i]))[:10000], dtype = np.double)
 output1 = np.argmax(output, axis=0) # в output1 сохранены предсказания для всего набора из 10000 изображений
 
 print("--- %s seconds ---" % (time.time() - start_time))
