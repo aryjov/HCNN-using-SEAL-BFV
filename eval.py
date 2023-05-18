@@ -13,7 +13,7 @@ from tensorflow.keras.utils import to_categorical
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 x_test = tf.math.round((x_test /255) * 4)
-x_test3 = np.array(x_test, np.longlong)
+x_test_ = np.array(x_test, np.int8)
 y_test_cat = to_categorical(y_test, 10)
 
 
@@ -89,7 +89,7 @@ for i in range(28):
     for j in range(28):
         cinput[i][j] = [0 for l in range(16384)]
         for k in range(10000):
-            cinput[i][j][k] = x_test3[k][i][j]
+            cinput[i][j][k] = x_test_[k][i][j]
         temp = batch_encoder.encode(cinput[i][j])
         cinput[i][j] = encryptor.encrypt(temp)
 
