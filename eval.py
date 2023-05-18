@@ -57,9 +57,9 @@ slot_count = batch_encoder.slot_count()
 print("--- %s seconds --- Задание контекста, параметров, генерация ключей,..." % (time.time() - start_time1))
 
 start_time1 = time.time()
-weights11 = weights1
-weights22 = weights2
-weights33 = weights3
+weights1_ = weights1
+weights2_ = weights2
+weights3_ = weights3
 weights1 = [[[[0 for k in range(5)] for j in range(1)] for h in range(5)] for t in range(5)]
 weights2 = [[[[0 for k in range(50)] for j in range(5)] for h in range(5)] for t in range(5)]
 weights3 = [[0 for k in range(10)] for j in range(800)]
@@ -67,17 +67,17 @@ weights3 = [[0 for k in range(10)] for j in range(800)]
 for i in range(5):
     for l1 in range(5):
         for l2 in range(5):
-            weights1[l1][l2][0][i] = batch_encoder.encode([int(weights11[l1][l2][0][i])] * slot_count)
+            weights1[l1][l2][0][i] = batch_encoder.encode([int(weights1_[l1][l2][0][i])] * slot_count)
 
 for i in range(50):
     for fil in range(5):
         for l1 in range(5):
             for l2 in range(5):
-                weights2[l1][l2][fil][i] = batch_encoder.encode([int(weights22[l1][l2][fil][i])] * slot_count)
+                weights2[l1][l2][fil][i] = batch_encoder.encode([int(weights2_[l1][l2][fil][i])] * slot_count)
 
 for i in range(10):
     for j in range(800):
-        weights3[j][i] = batch_encoder.encode([int(weights33[j][i])] * slot_count)
+        weights3[j][i] = batch_encoder.encode([int(weights3_[j][i])] * slot_count)
 
 print("--- %s seconds --- Batch encoding weights" % (time.time() - start_time1)) # Не входит в общее время работы сети
 
@@ -106,7 +106,7 @@ for i in range(5):
         for k in range(12):
             for l1 in range(5):
                 for l2 in range(5):
-                    if weights11[l1][l2][0][i] != 0:
+                    if weights1_[l1][l2][0][i] != 0:
                         temp = evaluator.multiply_plain(cinput[j * 2 + l1][k * 2 + l2], weights1[l1][l2][0][i])
                         lyr1[j][k][i] = evaluator.add(lyr1[j][k][i], temp)
 
@@ -131,7 +131,7 @@ for i in range(50):
             for fil in range(5):
                 for l1 in range(5):
                     for l2 in range(5):
-                        if weights22[l1][l2][fil][i] != 0:
+                        if weights2_[l1][l2][fil][i] != 0:
                             temp = evaluator.multiply_plain(lyr1[j * 2 + l1][k * 2 + l2][fil], weights2[l1][l2][fil][i])
                             lyr2[j][k][i] = evaluator.add(lyr2[j][k][i], temp) 
 
@@ -160,7 +160,7 @@ start_time1 = time.time()
 
 for i in range(10):
     for j in range(800):
-        if weights33[j][i] != 0:
+        if weights3_[j][i] != 0:
             temp = evaluator.multiply_plain(lyr3[j], weights3[j][i])
             lyr4[i] = evaluator.add(lyr4[i], temp)
 
